@@ -12,7 +12,7 @@ using WeatherArchive.Database;
 namespace WeatherArchive.Database.Migrations
 {
     [DbContext(typeof(WeatherArchiveDbContext))]
-    [Migration("20250226111446_Initial")]
+    [Migration("20250228112047_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace WeatherArchive.Database.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("WeatherArchive.Models.ReportWindDirection", b =>
+            modelBuilder.Entity("WeatherArchive.Database.Domain.ReportWindDirection", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,10 +33,10 @@ namespace WeatherArchive.Database.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("ReportId")
+                    b.Property<int?>("ReportId")
                         .HasColumnType("int");
 
-                    b.Property<int>("WindDirectionId")
+                    b.Property<int?>("WindDirectionId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -48,7 +48,7 @@ namespace WeatherArchive.Database.Migrations
                     b.ToTable("ReportWindDirections");
                 });
 
-            modelBuilder.Entity("WeatherArchive.Models.WeatherReport", b =>
+            modelBuilder.Entity("WeatherArchive.Database.Domain.WeatherReport", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -65,17 +65,16 @@ namespace WeatherArchive.Database.Migrations
                     b.Property<double>("DewPoint")
                         .HasColumnType("float");
 
-                    b.Property<int?>("HorizontalVisibility")
-                        .HasColumnType("int");
+                    b.Property<string>("HorizontalVisibility")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Humidity")
                         .HasColumnType("float");
 
-                    b.Property<int>("LowerCloudCover")
-                        .HasColumnType("int");
+                    b.Property<string>("LowerCloudCover")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phenomena")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Pressure")
@@ -95,7 +94,7 @@ namespace WeatherArchive.Database.Migrations
                     b.ToTable("WeatherReports");
                 });
 
-            modelBuilder.Entity("WeatherArchive.Models.WindDirection", b =>
+            modelBuilder.Entity("WeatherArchive.Database.Domain.WindDirection", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -104,7 +103,6 @@ namespace WeatherArchive.Database.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -154,26 +152,22 @@ namespace WeatherArchive.Database.Migrations
                         });
                 });
 
-            modelBuilder.Entity("WeatherArchive.Models.ReportWindDirection", b =>
+            modelBuilder.Entity("WeatherArchive.Database.Domain.ReportWindDirection", b =>
                 {
-                    b.HasOne("WeatherArchive.Models.WeatherReport", "Report")
+                    b.HasOne("WeatherArchive.Database.Domain.WeatherReport", "Report")
                         .WithMany("WindDirections")
-                        .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ReportId");
 
-                    b.HasOne("WeatherArchive.Models.WindDirection", "WindDirection")
+                    b.HasOne("WeatherArchive.Database.Domain.WindDirection", "WindDirection")
                         .WithMany()
-                        .HasForeignKey("WindDirectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("WindDirectionId");
 
                     b.Navigation("Report");
 
                     b.Navigation("WindDirection");
                 });
 
-            modelBuilder.Entity("WeatherArchive.Models.WeatherReport", b =>
+            modelBuilder.Entity("WeatherArchive.Database.Domain.WeatherReport", b =>
                 {
                     b.Navigation("WindDirections");
                 });

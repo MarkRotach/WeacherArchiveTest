@@ -27,9 +27,9 @@ namespace WeatherArchive.Database.Migrations
                     Pressure = table.Column<int>(type: "int", nullable: false),
                     WindSpeed = table.Column<int>(type: "int", nullable: true),
                     Cloudiness = table.Column<int>(type: "int", nullable: true),
-                    LowerCloudCover = table.Column<int>(type: "int", nullable: false),
-                    HorizontalVisibility = table.Column<int>(type: "int", nullable: true),
-                    Phenomena = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    LowerCloudCover = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HorizontalVisibility = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Phenomena = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -42,7 +42,7 @@ namespace WeatherArchive.Database.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -55,8 +55,8 @@ namespace WeatherArchive.Database.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ReportId = table.Column<int>(type: "int", nullable: false),
-                    WindDirectionId = table.Column<int>(type: "int", nullable: false)
+                    ReportId = table.Column<int>(type: "int", nullable: true),
+                    WindDirectionId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -65,14 +65,12 @@ namespace WeatherArchive.Database.Migrations
                         name: "FK_ReportWindDirections_WeatherReports_ReportId",
                         column: x => x.ReportId,
                         principalTable: "WeatherReports",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_ReportWindDirections_WindDirections_WindDirectionId",
                         column: x => x.WindDirectionId,
                         principalTable: "WindDirections",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.InsertData(
