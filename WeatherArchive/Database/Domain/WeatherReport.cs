@@ -55,12 +55,12 @@ public sealed class WeatherReport
     /// <summary>
     /// Нижняя граница облачности
     /// </summary>
-    public required int LowerCloudCover { get; set; }
+    public string LowerCloudCover { get; set; }
     
     /// <summary>
     /// Горизонтальная видимость
     /// </summary>
-    public int? HorizontalVisibility { get; set; }
+    public string HorizontalVisibility { get; set; }
     
     /// <summary>
     /// Погодные явления
