@@ -48,6 +48,6 @@ public class HomeController : Controller
             await _archiveUploader.UploadAsync(fileStream);
         }
         
-        return Ok();
+        return View();
     }
 }

@@ -11,6 +11,7 @@ public sealed class ArchiveUploader(WeatherArchiveDbContext context)
     private readonly WeatherArchiveDbContext _context = context;
     private IEnumerable<WindDirection> _windDirections;
     private const int StartProcessingRowIndex = 4;
+    private const int ValuedColumnsCount = 12;
 
     public async Task UploadAsync(Stream fileStream)
     {
@@ -23,6 +24,8 @@ public sealed class ArchiveUploader(WeatherArchiveDbContext context)
             var sheet = workbook.GetSheetAt(index);
             await UploadArchiveToDatabaseAsync(sheet);
         }
+        
+        await _context.SaveChangesAsync();
     }
 
     private async Task UploadArchiveToDatabaseAsync(ISheet sheet)
@@ -30,43 +33,46 @@ public sealed class ArchiveUploader(WeatherArchiveDbContext context)
         for (var rowIndex = StartProcessingRowIndex; rowIndex <= sheet.LastRowNum; rowIndex++)
         {
             var row = sheet.GetRow(rowIndex);
+            if (row is null) 
+                continue;
 
-            if (row is null) continue;
-
-            var weatherReport = CreateWeatherReport(row);
+            var columnsCount = row.LastCellNum;
+            if (columnsCount != ValuedColumnsCount)
+                continue;
+            
+            var date = DateOnly.Parse(row.GetCell(0).StringCellValue);
+            var time = TimeOnly.Parse(row.GetCell(1).StringCellValue);
+            
+            var isExistsReportByDate = await _context.WeatherReports
+                .AnyAsync(r => r.Date == date && r.Time == time);
+            
+            if (isExistsReportByDate)
+                continue;
+            
+            var weatherReport = CreateWeatherReport(row, date, time);
             var reportWindDirections = CreateReportWindDirections(row, weatherReport);
 
             await _context.WeatherReports.AddAsync(weatherReport);
             await _context.ReportWindDirections.AddRangeAsync(reportWindDirections);
         }
-
-        await _context.SaveChangesAsync();
     }
 
-    private static WeatherReport CreateWeatherReport(IRow row)
+    private static WeatherReport CreateWeatherReport(IRow row, DateOnly date, TimeOnly time)
     {
-        try
+        return new WeatherReport
         {
-            return new WeatherReport
-            {
-                Date = DateOnly.Parse(row.GetCell(0).StringCellValue),
-                Time = TimeOnly.Parse(row.GetCell(1).StringCellValue),
-                Temperature = Math.Round(row.GetCell(2).NumericCellValue, 1),
-                Humidity = Math.Round(row.GetCell(3).NumericCellValue, 2),
-                DewPoint = Math.Round(row.GetCell(4).NumericCellValue, 1),
-                Pressure = (int)row.GetCell(5).NumericCellValue,
-                WindSpeed = ParseNullableInt(row.GetCell(7), 0),
-                Cloudiness = ParseNullableInt(row.GetCell(8)),
-                LowerCloudCover = (int)row.GetCell(9).NumericCellValue,
-                HorizontalVisibility = ParseNullableInt(row.GetCell(10)),
-                Phenomena = row.GetCell(11).StringCellValue
-            };
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+            Date = date,
+            Time = time,
+            Temperature = Math.Round(row.GetCell(2).NumericCellValue, 1),
+            Humidity = Math.Round(row.GetCell(3).NumericCellValue, 2),
+            DewPoint = Math.Round(row.GetCell(4).NumericCellValue, 1),
+            Pressure = (int)row.GetCell(5).NumericCellValue,
+            WindSpeed = ParseNullableInt(row.GetCell(7), defaultValue: 0),
+            Cloudiness = ParseNullableInt(row.GetCell(8)),
+            LowerCloudCover = ParseIntCellAsString(row.GetCell(9)),
+            HorizontalVisibility = ParseIntCellAsString(row.GetCell(10)),
+            Phenomena = row.GetCell(11)?.StringCellValue ?? string.Empty
+        };
     }
     
     private IEnumerable<ReportWindDirection> CreateReportWindDirections(IRow row, WeatherReport report)
@@ -94,5 +100,11 @@ public sealed class ArchiveUploader(WeatherArchiveDbContext context)
 
     private static int? ParseNullableInt(ICell cell, int? defaultValue = null)
         => cell.CellType == CellType.String && string.IsNullOrWhiteSpace(cell.StringCellValue)
-            ? defaultValue : (int)cell.NumericCellValue;
+            ? defaultValue
+            : (int)cell.NumericCellValue;
+    
+    private static string ParseIntCellAsString(ICell cell)
+        => cell.CellType == CellType.String
+            ? cell.StringCellValue
+            : ((int)cell.NumericCellValue).ToString();
 }
