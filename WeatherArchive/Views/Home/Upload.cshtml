@@ -2,23 +2,21 @@
     ViewData["Title"] = "Загрузка архива";
 }
 
-<div class="container-sm">
-    <div class="m-3">
-        <form method="post" enctype="multipart/form-data">
-            <div class="input-group m-3">
-                <input type="file" class="form-control" name="files" multiple>
-                <button class="btn btn-outline-primary" type="submit">Отправить</button>
-            </div>
-        </form>
-        
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="alert alert-danger m-3" role="alert">
-                @foreach (var error in ViewData.ModelState[""].Errors)
-                {
-                    <p>@error.ErrorMessage</p>
-                }
-            </div>
-        }
-    </div>
+<div>
+    <form method="post" enctype="multipart/form-data">
+        <div class="input-group m-3">
+            <input type="file" class="form-control" name="files" multiple>
+            <button class="btn btn-outline-primary" type="submit">Отправить</button>
+        </div>
+    </form>
+    
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger m-3" role="alert">
+            @foreach (var error in ViewData.ModelState["error"].Errors)
+            {
+                <p>@error.ErrorMessage</p>
+            }
+        </div>
+    }
 </div>
