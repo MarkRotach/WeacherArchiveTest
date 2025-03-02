@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WeatherArchive.Database;
 
 #nullable disable
 
-namespace WeatherArchive.Database.Migrations
+namespace WeatherArchive.Migrations
 {
     [DbContext(typeof(WeatherArchiveDbContext))]
-    partial class WeatherArchiveDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250301104236_AddIndexes")]
+    partial class AddIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

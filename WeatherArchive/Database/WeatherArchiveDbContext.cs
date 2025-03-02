@@ -13,6 +13,10 @@ public sealed class WeatherArchiveDbContext(DbContextOptions<WeatherArchiveDbCon
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
+            .Entity<WeatherReport>()
+            .HasIndex(r => new { r.Date, r.Time });
+        
+        modelBuilder
             .Entity<WindDirection>()
             .HasData(
                 new WindDirection { Id = 1, Name = "С" },
