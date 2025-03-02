@@ -36,11 +36,12 @@ public sealed class WeatherReport
     /// Атмосферное давление
     /// </summary>
     public required int Pressure { get; set; }
-    
+
     /// <summary>
     /// Направления ветра
     /// </summary>
-    public IEnumerable<ReportWindDirection> WindDirections { get; set; }
+    public ICollection<ReportWindDirection> WindDirections { get; set; }
+        = new List<ReportWindDirection>();
     
     /// <summary>
     /// Скорость ветра

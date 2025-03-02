@@ -9,13 +9,14 @@ var configuration = builder.Configuration;
 
 services.AddControllersWithViews();
 
-services.AddDbContext<WeatherArchiveDbContext>(
+services.AddDbContextPool<WeatherArchiveDbContext>(
     options => options.UseSqlServer(
         configuration.GetConnectionString("DefaultConnection")
     )
 );
 
-services.AddScoped<ArchiveUploader>();
+services.AddScoped<ArchiveUploader>()
+    .AddScoped<ArchiveService>();
 
 var app = builder.Build();
 
