@@ -1,0 +1,181 @@
+@using Microsoft.AspNetCore.Http.Extensions
+@model WeatherArchiveViewModel
+
+@{
+    ViewData["Title"] = "Архив погодных условий";
+}
+
+<div class="row justify-content-between">
+    <div class="col-md-4">
+        <div class="row">
+            <div class="col">
+                <select class="form-select" id="yearsSelectBox">
+                    @{
+                        if (Model.SelectedYear is null)
+                        {
+                            <option value="" selected>Год</option>
+                        }
+
+                        foreach (var year in Model.Years)
+                        {
+                            if (year == Model.SelectedYear)
+                            {
+                                <option value="@year" selected>@year</option>
+                            }
+                            else
+                            {
+                                <option value="@year">@year</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+            
+            <div class="col">
+                <select class="form-select" id="monthsSelectBox">
+                    @{
+                        if (string.IsNullOrWhiteSpace(Model.SelectedMonth))
+                        {
+                            <option value="" selected>Месяц</option>
+                        }
+
+                        foreach (var month in Model.Months)
+                        {
+                            if (month == Model.SelectedMonth)
+                            {
+                                <option value="@month" selected>@month</option>
+                            }
+                            else
+                            {
+                                <option value="@month">@month</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+            
+            <div class="col">
+                @Html.ActionLink(
+                    "Очистить", "Archive",
+                    routeValues: new { page = 1 },
+                    htmlAttributes: new { @class = "btn btn-outline-primary" }
+                )
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-auto align-content-end">
+        <nav>
+            <ul class="pagination">
+                @{
+                    const int paginationRange = 3;
+
+                    var startPage = Math.Max(1, Model.SelectedPage - paginationRange);
+                    var endPage = Math.Min(Model.PagesCount, Model.SelectedPage + paginationRange);
+
+                    if (startPage > 1)
+                    {
+                        @Html.ActionLink(
+                            "1", "Archive",
+                            routeValues: new { page = 1, month = Model.SelectedMonth, year = Model.SelectedYear },
+                            htmlAttributes: new { @class = "page-link" }
+                        )
+
+                        if (startPage > 2)
+                        {
+                            <span class="page-link">...</span>
+                        }
+                    }
+
+                    for (var page = startPage; page < endPage; page++)
+                    {
+                        var active = Model.SelectedPage == page ? "active" : null;
+
+                        <li class="page-item @active">
+                            @Html.ActionLink(
+                                page.ToString(), "Archive",
+                                routeValues: new { page = page, month = Model.SelectedMonth, year = Model.SelectedYear },
+                                htmlAttributes: new { @class = $"page-link" }
+                            )
+                        </li>
+                    }
+
+                    if (endPage <= Model.PagesCount)
+                    {
+                        if (endPage <= Model.PagesCount - 1)
+                        {
+                            <span class="page-link">...</span>
+                        }
+
+                        var active = Model.SelectedPage == Model.PagesCount ? "active" : null;
+
+                        <li class="page-item @active">
+                            @Html.ActionLink(
+                                Model.PagesCount.ToString(), "Archive",
+                                routeValues: new { page = Model.PagesCount, month = Model.SelectedMonth, year = Model.SelectedYear },
+                                htmlAttributes: new { @class = "page-link" }
+                            )
+                        </li>
+                    }
+                }
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<table class="table table-sm table-hover table-striped">
+    <thead>
+    <tr class="table-primary align-text-top">
+        <th scope="col">Дата</th>
+        <th scope="col">Время</th>
+        <th scope="col">Температура, °C</th>
+        <th scope="col">Отн. влажность воздуха, %</th>
+        <th scope="col">Точка росы, °C</th>
+        <th scope="col">Атм. давление, мм. рт. ст</th>
+        <th scope="col">Направление ветра</th>
+        <th scope="col">Скорость ветра, м/с</th>
+        <th scope="col">Облачность, %</th>
+        <th scope="col">Нижняя граница облачности, м</th>
+        <th scope="col">Горизонтальная видимость, м</th>
+        <th scope="col">Погодные явления</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var report in Model.WeatherReports)
+    {
+        <tr>
+            <td>@report.Date</td>
+            <td>@report.Time</td>
+            <td>@report.Temperature</td>
+            <td>@report.Humidity</td>
+            <td>@report.DewPoint</td>
+            <td>@report.Pressure</td>
+            <td>@report.WindDirections</td>
+            <td>@report.WindSpeed</td>
+            <td>@report.Cloudiness</td>
+            <td>@report.LowerCloudCover</td>
+            <td>@report.HorizontalVisibility</td>
+            <td>@report.Phenomena</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(_ => {
+        function updatePageOnChangeFilters() {
+            var year = $("#yearsSelectBox").val();
+            var month = $("#monthsSelectBox").val();
+            var page = 1;
+            
+            var url = '@Context.Request.Path' + '?page=' + page;
+            if (year != "") url += '&year=' + year;
+            if (month != "") url += '&month=' + month;
+            
+            window.location.href = url;
+        }
+
+        $('#yearsSelectBox').on('change', updatePageOnChangeFilters);
+        $('#monthsSelectBox').on('change', updatePageOnChangeFilters);
+    });
+</script>
